@@ -31,11 +31,12 @@ def on_release(key):
 def client_listen():
     while True:
         data = s.recv(1024)
-        print(data.decode('utf-8'))
+        print(data.decode('utf-8')
+              )
 
     
 #this should be the IP address and port of the server you are trying to connect to
-host = '10.1.10.175'
+host = '192.168.0.169'
 
 port = 12345
 

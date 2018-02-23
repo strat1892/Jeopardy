@@ -13,7 +13,6 @@ clear = lambda: os.system('cls')
 
 with open("first_round.txt") as f:
     q_board = f.readlines()
-    print(q_board)
 q_board = [x.strip("\n") for x in q_board]
 
 #build matrix for board
@@ -23,8 +22,8 @@ for x in range(5):
         m_board[x][y] = str(x*100 + 100)
 
 
-num_players = int(input('Enter the number of players: '))
-playernum = 0;
+#num_players = int(input('Enter the number of players: '))
+
 name = threading.local()
 name = threading.local()
 c_socket = []
@@ -56,9 +55,7 @@ def draw_board():
     for m in range(0,5):
         board = draw_square(board, m)
         board += "\n"
-        board = draw_horiz(board)
- 
-        
+        board = draw_horiz(board)      
     print(board)
     
 def draw_square(s_board, x):
@@ -94,7 +91,19 @@ def send_to_all(blast_message):
     for k in range(0 , num_players):
         c_socket[k].send(str.encode(blast_message))
 
-#def server_commands():
+def connection():
+    playernum = 0;
+    #specify that we will accept 5 connections
+    s.listen(5)
+    while True:
+        c, addr = s.accept()
+        c_socket.append(c)
+        #Notify the user that a connection was made
+        print('connected to: ', addr, 'player number: ', playernum)
+        t = threading.Thread(target=register_user, args=(playernum, c, ))
+        threads.append(t)
+        t.start()
+        playernum += 1   
     
 
 #this is the server so ask the OS what the computer name is
@@ -111,26 +120,16 @@ print('Listening for incoming connections ')
 threads = []
 
 
-for i in range(0, num_players):
+conn_thread = threading.Thread(target=connection)
+conn_thread.start()
     
-    #specify that we will accept 5 connections
-    s.listen(5)
-
-    #accept the first connection
-    c, addr = s.accept()
-    c_socket.append(c)
-    #Notify the user that a connection was made
-    print('connected to: ', addr, 'player number: ', i)
-    t = threading.Thread(target=register_user, args=(playernum, c, ))
-    threads.append(t)
-    t.start()
-    playernum += 1                    
+                     
 
 #ask for input
-print('All players entered')
-for i in range(0, num_players):
-    namet = threads[i].name
-    print(namet)
+#print('All players entered')
+#for i in range(0, num_players):
+#    namet = threads[i].name
+#    print(namet)
 
 # Collect events until released
 with Listener(

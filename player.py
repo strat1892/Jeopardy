@@ -16,23 +16,24 @@ clear = lambda: os.system('cls')
 
 def on_press(key):
     if key == Key.tab:
-        clear()
+        nothing = 0
     
 
 def on_release(key):
+
     if key == Key.space: 
         message = '0'
         s.send(str.encode(message))
     elif key == KeyCode(char='1'):
-        clear()
         message = '1'
         s.send(str.encode(message))
         
 def client_listen():
     while True:
         data = s.recv(1024)
-        print(data.decode('utf-8')
-              )
+        clear()
+        print(data.decode('utf-8'))
+              
 
     
 #this should be the IP address and port of the server you are trying to connect to
@@ -60,5 +61,5 @@ t.start()
 with Listener(
             on_press=on_press,
             on_release=on_release) as listener:
-    listener.join()
+    listener.join() 
 

@@ -22,32 +22,34 @@ for x in range(5):
         m_board[x][y] = str(x*100 + 100)
 
 
-global playernum
-playernum = 0;
-threads = []
-name = threading.local()
-player_name = []
-c_socket = []
-player_score = []
-global question_live
-question_live = False
-global player_buzz
-player_buzz = False
 
-
-question = "  "
+playernum = 0;  #Assign number as players connect
+threads = []    #List for threads
+name = threading.local() #check can prob get rid of this
+player_name = []    #list of player names
+c_socket = []   #list of player connections
+player_score = []   #Keep track of scores
+question_live = False   #Has a question been asked
+player_buzz = False     #Can someone buzz in
+prize = 0;      #What the current value of question is
+question = "  " #String of question
+cursor_x = 0
+cursor_y = 0
 
 def on_press(key):
-    if key == Key.tab:
-        nothing = 0
+    if key == Key.delete:
+        sys.exit(0)
   
 def on_release(key):
-      
+    global prize
     if key == KeyCode(char='q'):
-        x = int(input("Column: 0 - 5  "))
-        y = int(input("Row 0 - 4  "))
+        x = int(input("Row 0 - 5  "))
+        y = int(input("Column: 0 - 4  "))
         question = q_board[x*11 + 2*y + 1]
-        m_board[x][y] = "   "
+        prize = y*100 + 100
+        m_board[y][x] = "   "
+        
+        
         global question_live
         question_live = True
         send_to_all(question)
@@ -59,8 +61,6 @@ def on_release(key):
         for i in range(0,playernum):
             print("\n" + player_name[i] + ": Score: " + str(player_score[i]))
     
-
-
 
 def draw_board():
     board="\n-"
@@ -99,6 +99,7 @@ def draw_horiz(h_board):
 def register_user(j, client_c):
     global question_live
     global player_answer
+    global player_score
     print('Registering player number: ', j)
     client_c.send(str.encode('Enter your name'))
     player_name.append(client_c.recv(1024).decode('utf-8'))
@@ -121,11 +122,13 @@ def register_user(j, client_c):
                 answer = input("Correct? y/n ")
                 if answer == 'y':
                     question_live = False
-                    send_to_all(message + "\nCorrect!!!!")
-                    player_score[j] += 100
+                    player_score[j] += prize
+                    send_to_all(message + "\nCorrect!!!! You won: " + str(prize) )
+                    
                 else:
                     play_buzz = False
-                    send_to_all(message + "\nIncorrect" + question)
+                    player_score[j] -= prize
+                    send_to_all(message + "\nIncorrect \n" + question)
         else:
             client_c.send(str.encode(message + "\nPlease wait for a question to buzz in"))
             

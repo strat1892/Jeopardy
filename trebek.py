@@ -106,6 +106,8 @@ def register_user(j, client_c):
             answer = input("Correct? y/n  ")
             if answer:
                 score += 100
+            else:
+                liive = True
         else:
             message += "\nPlease wait for a question to buzz in"
             

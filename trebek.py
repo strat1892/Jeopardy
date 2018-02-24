@@ -107,7 +107,7 @@ def register_user(j, client_c):
             if answer:
                 score += 100
             else:
-                liive = True
+                live = True
         else:
             message += "\nPlease wait for a question to buzz in"
             

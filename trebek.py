@@ -27,6 +27,7 @@ for x in range(5):
 name = threading.local()
 name = threading.local()
 c_socket = []
+global live
 live = False
 question = "  "
 
@@ -40,6 +41,8 @@ def on_release(key):
         x = int(input("Column: 0 - 5  "))
         y = int(input("Row 0 - 4  "))
         question = q_board[x*11 + 2*y + 1]
+        global live
+        live = True
         send_to_all(question)
         clear()
 
@@ -81,6 +84,7 @@ def draw_horiz(h_board):
     
 def register_user(j, client_c):
     score = 0
+    global live
     print('Registering player number: ', j)
     client_c.send(str.encode('Enter your name'))
     name = client_c.recv(1024).decode('utf-8')
@@ -95,7 +99,14 @@ def register_user(j, client_c):
         message = ("\n" + draw_board() +
                    "\nYour score is: " + str(score) +
                    "\n" + question)
-        if not live:
+        
+        if live:
+            message += "****************** Answer**********************"
+            live = False
+            answer = input("Correct? y/n  ")
+            if answer:
+                score += 100
+        else:
             message += "\nPlease wait for a question to buzz in"
             
         client_c.send(str.encode(message))

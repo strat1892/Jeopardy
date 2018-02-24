@@ -22,13 +22,19 @@ for x in range(5):
         m_board[x][y] = str(x*100 + 100)
 
 
-#num_players = int(input('Enter the number of players: '))
-
+global playernum
+playernum = 0;
+threads = []
 name = threading.local()
-name = threading.local()
+player_name = []
 c_socket = []
-global live
-live = False
+player_score = []
+global question_live
+question_live = False
+global player_buzz
+player_buzz = False
+
+
 question = "  "
 
 def on_press(key):
@@ -41,20 +47,23 @@ def on_release(key):
         x = int(input("Column: 0 - 5  "))
         y = int(input("Row 0 - 4  "))
         question = q_board[x*11 + 2*y + 1]
-        global live
-        live = True
+        m_board[x][y] = "   "
+        global question_live
+        question_live = True
         send_to_all(question)
         clear()
 
     elif key == KeyCode(char='b'):
         clear()
         print(draw_board())
+        for i in range(0,playernum):
+            print("\n" + player_name[i] + ": Score: " + str(player_score[i]))
     
 
 
 
 def draw_board():
-    board="-"
+    board="\n-"
     board = draw_horiz(board)
     #add in column titles
     for l in range(0,6):
@@ -66,7 +75,12 @@ def draw_board():
     for m in range(0,5):
         board = draw_square(board, m)
         board += "\n"
-        board = draw_horiz(board)      
+        board = draw_horiz(board)
+
+    for i in range(0, playernum):
+        board += "\n" + player_name[i] + ": Score: " + str(player_score[i])
+
+    board += "\n" + question
     return board
     
 def draw_square(s_board, x):
@@ -83,42 +97,46 @@ def draw_horiz(h_board):
     return h_board
     
 def register_user(j, client_c):
-    score = 0
-    global live
+    global question_live
+    global player_answer
     print('Registering player number: ', j)
     client_c.send(str.encode('Enter your name'))
-    name = client_c.recv(1024).decode('utf-8')
-    print('Player number ', j, ' name is', name)
+    player_name.append(client_c.recv(1024).decode('utf-8'))
+    player_score.append(0)
+    print('Player number ', j, ' name is', player_name[j])
     message = (
-        '\n Welcome ' + str(name) + ', you have been registered, good luck!!!\n'
+        '\n Welcome ' + str(player_name[j]) + ', you have been registered, good luck!!!\n'
         'Press Space to Buzz in\n')
     message = message + str(draw_board())
     client_c.send(str.encode(message))
     while True:
         c_message = client_c.recv(1024).decode('utf-8')
-        message = ("\n" + draw_board() +
-                   "\nYour score is: " + str(score) +
-                   "\n" + question)
-        
-        if live:
-            message += "****************** Answer**********************"
-            live = False
-            answer = input("Correct? y/n  ")
-            if answer:
-                score += 100
-            else:
-                live = True
-        else:
-            message += "\nPlease wait for a question to buzz in"
-            
+        message = draw_board()
         client_c.send(str.encode(message))
+        
+        if question_live:
+                client_c.send(str.encode(message + "****************** Answer**********************"))
+                print(player_name[j] + " has buzzed in")
+                player_buzz = True
+                answer = input("Correct? y/n ")
+                if answer == 'y':
+                    question_live = False
+                    send_to_all(message + "\nCorrect!!!!")
+                    player_score[j] += 100
+                else:
+                    play_buzz = False
+                    send_to_all(message + "\nIncorrect" + question)
+        else:
+            client_c.send(str.encode(message + "\nPlease wait for a question to buzz in"))
+            
+       
 
 def send_to_all(blast_message):
     for k in c_socket:
         k.send(str.encode(blast_message))
 
 def connection():
-    playernum = 0;
+    global playernum
     #specify that we will accept 5 connections
     s.listen(5)
     while True:
@@ -143,7 +161,6 @@ s = socket.socket()
 #bind the socket to the port
 s.bind((host, port))
 print('Listening for incoming connections ')
-threads = []
 
 #This is the main thread that accepts connections
 conn_thread = threading.Thread(target=connection)

@@ -24,9 +24,8 @@ def on_release(key):
     if key == Key.space: 
         message = '0'
         s.send(str.encode(message))
-    elif key == KeyCode(char='1'):
-        message = '1'
-        s.send(str.encode(message))
+    elif key == Key.esc:
+        sys.exit(0)
         
 def client_listen():
     while True:

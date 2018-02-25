@@ -33,8 +33,7 @@ question_live = False   #Has a question been asked
 player_buzz = False     #Can someone buzz in
 prize = 0;      #What the current value of question is
 question = "  " #String of question
-cursor_x = 0
-cursor_y = 0
+cursor_pos = 189 #Position in string of first square
 
 def on_press(key):
     if key == Key.delete:
@@ -42,6 +41,7 @@ def on_press(key):
   
 def on_release(key):
     global prize
+    global cursor_pos
     if key == KeyCode(char='q'):
         x = int(input("Row 0 - 5  "))
         y = int(input("Column: 0 - 4  "))
@@ -56,11 +56,23 @@ def on_release(key):
         clear()
 
     elif key == KeyCode(char='b'):
-        clear()
-        print(draw_board())
-        for i in range(0,playernum):
-            print("\n" + player_name[i] + ": Score: " + str(player_score[i]))
-    
+        host_board()
+        
+    elif key == Key.right:
+        cursor_pos += 10
+        host_board()
+
+    elif key == Key.left:
+        cursor_pos -= 10
+        host_board()
+
+    elif key == Key.down:
+        cursor_pos += 123
+        host_board()
+
+    elif key == Key.up:
+            cursor_pos -= 123
+            host_board()
 
 def draw_board():
     board="\n-"
@@ -82,6 +94,14 @@ def draw_board():
 
     board += "\n" + question
     return board
+
+#Adds to the board the curor to select the question
+def host_board():
+    clear()
+    message = draw_board()
+    message = message[:cursor_pos] + '*' + message[cursor_pos + 1:]
+    print(message)
+    
     
 def draw_square(s_board, x):
     s_board = s_board + "|   " + m_board[x][0] + "   |"
@@ -164,6 +184,7 @@ s = socket.socket()
 #bind the socket to the port
 s.bind((host, port))
 print('Listening for incoming connections ')
+host_board()
 
 #This is the main thread that accepts connections
 conn_thread = threading.Thread(target=connection)

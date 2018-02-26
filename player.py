@@ -36,7 +36,7 @@ def client_listen():
 
     
 #this should be the IP address and port of the server you are trying to connect to
-host = '192.168.0.169'
+host = '172.19.38.76'
 
 port = 12345
 

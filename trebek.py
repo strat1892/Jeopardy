@@ -34,10 +34,11 @@ question = "  "  # String of question
 cursor_x = 0
 cursor_y = 0
 cursor_pos = 189  # Position in string of first square
+lock = threading.Lock()
 
 
 def on_press(key):
-    if key == Key.shift:
+    if key == Key.delete:
         sys.exit(0)
 
 
@@ -148,14 +149,18 @@ def register_user(j, client_c):
         client_c.recv(1024).decode('utf-8')
         message = draw_board()
         client_c.send(str.encode(message))
-
+        
+        lock.acquire()
         if question_live and not player_buzz:
+            
             client_c.send(str.encode(message + "\n****************** Answer**********************"))
             print(player_name[j] + " has buzzed in")
             player_buzz = True
+            lock.release()
             answer = input("Correct? y/n ")
             if answer == 'y':
                 question_live = False
+                player_buzz = False
                 player_score[j] += prize
                 question = " "
                 send_to_all(message + "\nCorrect!!!! You won: " + str(prize))
@@ -163,11 +168,15 @@ def register_user(j, client_c):
             else:
                 player_buzz = False
                 player_score[j] -= prize
-                send_to_all(message + "\nIncorrect \n" + question)
+                send_to_all(message + "\nIncorrect \n")
         elif question_live and player_buzz:
-            client_c.send(str.encode(message + "Another player has buzzed in First"))
+            lock.release()
+            client_c.send(str.encode(message + "\nAnother player has buzzed in First"))
+            
         else:
+            lock.release()
             client_c.send(str.encode(message + "\nPlease wait for a question to buzz in"))
+            
 
 
 def send_to_all(blast_message):

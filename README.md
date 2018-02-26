@@ -6,16 +6,16 @@ Jeopardy game to learn Python (DCI)
 ## Instructions:
 
 ### Trebek - 
-	* b - display the board, players and scores
-	* q - Enter the question the player requests
+* b - display the board, players and scores
+* q - Enter the question the player requests
 	
 ### Players
-	* space - Buzz in
-	* ESC - quit
+* space - Buzz in
+* ESC - quit
 
 ### TODO: 
-	* Handle loosing player connections
-	* Question input method
-	* Double Jeopardy
-	* Daily Double
+* Handle loosing player connections
+* Question input method
+* Double Jeopardy
+* Daily Double
 	

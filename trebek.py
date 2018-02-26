@@ -31,6 +31,7 @@ question_live = False  # Has a question been asked
 player_buzz = False  # Can someone buzz in
 prize = 0;  # What the current value of question is
 question = "  "  # String of question
+answer = "  "   #answer to the question
 cursor_x = 0
 cursor_y = 0
 cursor_pos = 189  # Position in string of first square
@@ -48,10 +49,12 @@ def on_release(key):
     global cursor_x
     global cursor_y
     global question
+    global answer
     if key == KeyCode(char='q'):
-        x = int(input("Row 0 - 5  "))
-        y = int(input("Column: 0 - 4  "))
+        x = cursor_x
+        y = cursor_y
         question = q_board[x * 11 + 2 * y + 1]
+        answer = q_board[x * 11 + 2 * y + 2]
         prize = y * 100 + 100
         m_board[y][x] = "   "
 
@@ -135,6 +138,7 @@ def register_user(j, client_c):
     global player_score
     global player_buzz
     global question
+    global answer
     print('Registering player number: ', j)
     client_c.send(str.encode('Enter your name'))
     player_name.append(client_c.recv(1024).decode('utf-8'))
@@ -154,11 +158,11 @@ def register_user(j, client_c):
         if question_live and not player_buzz:
             
             client_c.send(str.encode(message + "\n****************** Answer**********************"))
-            print(player_name[j] + " has buzzed in")
+            print(player_name[j] + " has buzzed in\nAnswer is: " + answer)
             player_buzz = True
             lock.release()
-            answer = input("Correct? y/n ")
-            if answer == 'y':
+            correct = input("Correct? y/n ")
+            if correct == 'y':
                 question_live = False
                 player_buzz = False
                 player_score[j] += prize
